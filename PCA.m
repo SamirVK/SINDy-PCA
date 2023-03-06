@@ -95,7 +95,7 @@ t = 0:T:L; % time data
 t = t(1,2:end);
 
 % PCA using low-rank SVD
-X = U(:,1:2)'*X_ideal_r2;
+X = U(:,1:2)'*X_ideal;
 Y = (X(:,2:end-50)-X(:,1:end-51))/T;
 X = X(:,1:end-51);
 
@@ -105,7 +105,11 @@ theta = ones(1,frames-51); % constant term
 theta(2:3,:) = X; % linear terms u and v
 theta(4,:) = X(1,:).^2; % u^2
 theta(5,:) = X(2,:).^2; % v^2
-theta(6,:) = X(1,:).*X(2,:); % uv 
+theta(6,:) = X(1,:).*X(2,:); % uv
+theta(7,:) = X(1,:).^3; % u^3
+theta(8,:) = X(2,:).^3; % v^3
+theta(9,:) = X(1,:).*X(2,:).^2; % uv^2
+theta(10,:) = X(1,:).^2.*X(2,:); % u^2v
 
 Xi = Y*pinv(theta);
 
@@ -246,7 +250,7 @@ XiIntString = string(abs(XiInt_new));
 fprintf('Discovered model using SINDy: \n')
 fprintf('\n')
 
-% Print dx/dt model:
+% Print du/dt model:
 fprintf('du/dt = ')
 bigcoeffs = abs(XiInt_new(1,:)) > 1e-5;
 for jnd = 1:length(bigcoeffs)
@@ -263,7 +267,7 @@ for jnd = 1:length(bigcoeffs)
 end
 fprintf('\n')
 
-% Print dy/dt model:
+% Print dv/dt model:
 fprintf('dv/dt = ')
 bigcoeffs = abs(XiInt_new(2,:)) > 1e-5;
 for jnd = 1:length(bigcoeffs)
@@ -364,6 +368,6 @@ end
 
 function duvdt = NewtonHookeODE(t,uv)
 
-duvdt = [-4.0029 + 3.135*uv(2);
-         -9.947 - 2.9197*uv(1)];
+duvdt = [-3.0865-0.42511*uv(1)+3.1522*uv(2);
+         -9.947-2.9197*uv(1)];
 end
