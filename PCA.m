@@ -95,7 +95,7 @@ t = 0:T:L; % time data
 t = t(1,2:end);
 
 % PCA using low-rank SVD
-X = U(:,1:2)'*X_ideal;
+X = U(:,1:2)'*X_shaky;
 Y = (X(:,2:end-50)-X(:,1:end-51))/T;
 X = X(:,1:end-51);
 
@@ -214,7 +214,7 @@ end
 XiInt = Y*pinv(ThetaInt);
 
 % Sparsity parameter
-lam = 0.8;
+lam = 0.5;
 
 k = 1;
 XiInt_new = XiInt;
@@ -288,7 +288,7 @@ fprintf('\n')
 t = 0:T:L; % time data
 t = t(1,2:end);
 
-figure(1)
+figure(3)
 plot(t,X(:,1:end))
 axis([0 9 -120 120])
 title('Paint can trajectory over time')
@@ -298,11 +298,11 @@ legend('Can position','Derivative')
 
 t0 = t(1); 
 tfinal = t(end);
-uv0 = [42.1; 93.6];
+uv0 = [-19.8; 126.3];
 
 [t,uv] = ode45(@NewtonHookeODE,[t0 tfinal],uv0);
-[pks,locs] = findpeaks(uv(:,1));
-dist = locs(2) - locs(1); %or whichever two peaks you want to know about
+%[pks,locs] = findpeaks(uv(:,1));
+%dist = locs(2) - locs(1); %or whichever two peaks you want to know about
 figure(2)
 plot(t,uv)
 axis([0 9 -140 140])
@@ -311,6 +311,22 @@ xlabel('Time (s)')
 ylabel('Centred pixel data')
 legend('Can position','Derivative')
 
+%% Plot singular values and projected data
+
+figure('Position',[172 403 560 200])
+%subplot('position',[0.1 0.1 0.3 0.5])
+subplot(1,2,1)
+plot(diag(S).^2,'.','MarkerSize', 30)
+xlabel('Input Variable')
+ylabel('Squared Singular Values')
+legend('\sigma_i^2','FontSize',14)
+%subplot('position',[0.5 0.11 0.3 0.5])
+subplot(1,2,2)
+plot(t,X)
+axis([0 9 -120 120])
+xlabel('Time (s)')
+ylabel('Centred pixel data')
+%legend('1^{st} input variable', '2^{nd} input variable')
 
 %% Algorithm 1: Locate the yellow paint! 
 % Using a yellow frame, we parse through each of the 6 videos looking 
@@ -351,7 +367,7 @@ save('d32_ypos.mat','ypos');
 
 %% Play movies
 load mri
-mov = immovie(d11);
+mov = immovie(d12);
 implay(mov)
 
 %% Play video frames with centre position as blue dot
@@ -368,6 +384,6 @@ end
 
 function duvdt = NewtonHookeODE(t,uv)
 
-duvdt = [-3.0865-0.42511*uv(1)+3.1522*uv(2);
-         -9.947-2.9197*uv(1)];
+duvdt = [-0.69785;
+         -3.9572 + 3.4609*uv(1) - 1.4634*uv(2)];
 end
